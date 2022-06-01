@@ -1,6 +1,6 @@
 targetScope = 'subscription'
 
-var location = 'northeurope'
+var location = 'East US'
 
 var resourceNamePrefix = 'test-resource'
 
