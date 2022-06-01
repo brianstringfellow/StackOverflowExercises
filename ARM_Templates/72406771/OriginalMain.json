@@ -1,0 +1,129 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourcegroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name given to the group and all resources it contains by default"
+      }
+    },
+    "resourceGroupLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "The Location of the resource group"
+      }
+    },
+    "templateFolderUri": {
+      "type": "string",
+      "metadata": {
+        "description": "The URI of the template component folder"
+      }
+    }
+  },
+  "functions": [],
+  "variables": {},
+  "resources": [
+    {
+      "condition": false,
+      "name": "[concat(parameters('resourceGroupName'), 'Dev')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "location": "[parameters('resourceGroupLocation')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('templateFolderUri'), '/completeNovaRssDeploy.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "resourcegroupName": {
+            "value": "[concat(parameters('resourcegroupName'), 'Dev')]"
+          },
+          "resourceGroupLocation": {
+            "value": "[parameters('resourceGroupLocation')]"
+          },
+          "templateFolderUri": {
+            "value": "[concat(parameters('templateFolderUri'), '/Components')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": true,
+      "name": "[concat(parameters('resourceGroupName'), 'Test')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "location": "[parameters('resourceGroupLocation')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('templateFolderUri'), '/completeNovaRssDeploy.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "resourcegroupName": {
+            "value": "[concat(parameters('resourcegroupName'), 'Test')]"
+          },
+          "resourceGroupLocation": {
+            "value": "[parameters('resourceGroupLocation')]"
+          },
+          "templateFolderUri": {
+            "value": "[concat(parameters('templateFolderUri'), '/Components')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": false,
+      "name": "[concat(parameters('resourceGroupName'), 'Cat')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "location": "[parameters('resourceGroupLocation')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('templateFolderUri'), '/completeNovaRssDeploy.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "resourcegroupName": {
+            "value": "[concat(parameters('resourcegroupName'), 'Cat')]"
+          },
+          "resourceGroupLocation": {
+            "value": "[parameters('resourceGroupLocation')]"
+          },
+          "templateFolderUri": {
+            "value": "[concat(parameters('templateFolderUri'), '/Components')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": false,
+      "name": "[parameters('resourceGroupName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "location": "[parameters('resourceGroupLocation')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('templateFolderUri'), '/completeNovaRssDeploy.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "resourcegroupName": {
+            "value": "[parameters('resourcegroupName')]"
+          },
+          "resourceGroupLocation": {
+            "value": "[parameters('resourceGroupLocation')]"
+          },
+          "templateFolderUri": {
+            "value": "[concat(parameters('templateFolderUri'), '/Components')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+
+  },
+  "variables": {
+    "functionAccess": {
+      "value": [
+        {
+          "name": "[parameters('Function_1')]"
+        },
+        {
+          "name": "[parameters('Function_2')]"
+        },
+        {
+          "name": "[parameters('Function_3')]"
+        }
+      ]
+    }
+  },
+  "resources": [
+    {
+      "condition": "[not(equals(variables('functionAccess')[CopyIndex()].name, 'false'))]",
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(parameters('KeyVault_Name'), '/add')]",
+      "copy": {
+        "batchSize": 1,
+        "count": "[length(variables('functionAccess'))]",
+        "mode": "Serial",
+        "name": "accessPolicies"
+      },
+      "properties": {
+        "accessPolicies": [
+          {
+            "tenantId": "[subscription().tenantId]",
+            "objectId": "[if(not(equals(variables('functionAccess')[CopyIndex()].name, 'false')), reference(concat('Microsoft.Web/sites/', variables('functionAccess')[CopyIndex()].name), '2016-08-01', 'Full').identity.principalId, json('null'))]",
+            "permissions": {
+              "keys": [
+                "get",
+                "list"
+              ],
+              "secrets": [
+                "get",
+                "list"
+              ],
+              "certificates": [
+                "get",
+                "list"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(parameters('KeyVault_Name'), '/add')]",
+      "properties": {
+        "copy": [
+          {
+            "batchSize": 1,
+            "count": "[length(variables('functionAccess'))]",
+            "mode": "serial",
+            "name": "accessPolicies",
+            "input": {
+              "condition": "[not(equals(variables('functionAccess')[copyIndex('accessPolicies')].name, 'false'))]",
+              "tenantId": "[subscription().tenantId]",
+              "objectId": "[if(not(equals(variables('functionAccess')[copyIndex('accessPolicies')].name, 'false')), reference(concat('Microsoft.Web/sites/', variables('functionAccess')[copyIndex('accessPolicies')].name), '2016-08-01', 'Full').identity.principalId, json('null'))]",
+              "permissions": {
+                "keys": [
+                  "get",
+                  "list"
+                ],
+                "secrets": [
+                  "get",
+                  "list"
+                ],
+                "certificates": [
+                  "get",
+                  "list"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "MetaPortNameArray": {
+      "type": "array"
+    },
+    "location": {
+      "type": "string"
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('MetaPortNameArray')[copyIndex()].VmName,'/newuserscript')]",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines/', parameters('MetaPortNameArray')[copyIndex()].VmName)]"
+      ],
+      "copy": {
+        "name": "vmExtCopy",
+        "count": "[length(parameters('MetaPortNameArray'))]"
+      },
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [ "https://raw.githubusercontent.com/willguibr/azure/main/MetaPort-Standalone-NATGW-v1.0/install_metaport.sh" ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('sh install_metaport.sh ', parameters('MetaPortNameArray')[copyIndex()].MPTokenCode)]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

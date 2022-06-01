@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.1",
+  "parameters": {
+    "CountryString": {
+      "type": "string",
+      "metadata": { "Description": "Select a country from the list." },
+      "defaultValue": "United States",
+      "allowedValues": [ "United States", "Germany" ]
+    },
+    "CountryObject": {
+      "type": "object",
+      "defaultValue": {
+        "United States": "US",
+        "Germany": "DE",
+        "United Kingdom": "GB"
+      }
+    }
+  },
+  "variables": {
+    "OutputString": {
+      "type": "string",
+      "value": "[parameters('CountryObject')[parameters('CountryString')]]"
+    }  },
+
+  "resources": [],
+  "outputs": {
+    "OutputString": {
+      "type": "string",
+      "value": "[variables('OutputString').value]"
+    }
+  }
+}

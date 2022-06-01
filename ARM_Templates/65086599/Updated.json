@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "defaultValue": "nssbwuskv9z"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+
+    "sku": {
+      "type": "string",
+      "defaultValue": "Standard"
+    },
+    "accessPolicies": {
+      "type": "array",
+      "defaultvalue": [
+        {
+          "objectId": "a46901fc-6c14-4cdd-9a29-c9119bd08494",
+          "tenantId": "[subscription().tenantId]",
+          "permissions": {
+            "keys": [],
+            "secrets": ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"],
+            "certificates": []
+          },
+          "applicationId": null
+        }
+      ]
+    },
+    "tenantId": {
+      "type": "string",
+      "defaultValue": "[subscription().tenantId]",
+      "metadata": {
+        "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault. Get it by using Get-AzSubscription cmdlet."
+      }
+    }
+  },
+  "variables": {
+
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[parameters('name')]",
+      "location": "West US",
+      "apiVersion": "2018-02-14",
+      "tags": {
+        "displayName": "KeyVault"
+      },
+      "properties": {
+        "enabledForDeployment": false,
+        "enabledForTemplateDeployment": false,
+        "enabledForDiskEncryption": false,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 90,
+
+        "tenantId": "[parameters('tenantId')]",
+        "accessPolicies": "[parameters('accessPolicies')]",
+        "sku": {
+          "name": "[parameters('sku')]",
+          "family": "A"
+        },
+        "networkAcls": {
+          "defaultAction": "Allow",
+          "bypass": "AzureServices"
+        }
+      }
+    }
+  ],
+  "outputs": {
+
+  }
+}

@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {
+        "totalTenants": 20,
+        "tenantsPerBackendPool": 5,
+        "copy": [
+            {
+                "name": "firstPass",
+                "count": "[variables('totalTenants')]",
+                "input": "[concat('/tenant', copyIndex('firstPass', 1), '/*')]"
+            },
+            {
+                "name": "finalpass",
+                "count": "[div(variables('totalTenants'), variables('tenantsPerBackendPool'))]",
+                "input": "[take(skip(variables('firstPass'), mul(variables('tenantsPerBackendPool'), copyIndex('finalPass'))), variables('tenantsPerBackendPool'))]"
+            }
+        ]
+    },
+    "resources": [ ],
+    "outputs": {
+        "firstPass": {
+            "type": "array",
+            "value": "[variables('firstPass')]"
+        },
+        "finalPass": {
+            "type": "array",
+            "value": "[variables('finalpass')]"
+        }
+    }
+}

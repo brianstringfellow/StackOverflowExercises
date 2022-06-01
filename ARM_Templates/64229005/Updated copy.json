@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+    "totalTenants": 20,
+    "tenantsPerBackendPool": 5,
+    "copy": [
+      {
+        "name": "outerCopy",
+        "count": "[div(variables('totalTenants'), variables('tenantsPerBackendPool'))]",
+        "input": "[concat('tenant', copyIndex('outerCopy'))]"
+      },
+      {
+        "name": "innerCopy",
+        "count": 5,
+        "input": "[concat(variables('outerCopy')[1], copyIndex('innerCopy', 2))]"
+      }
+    ]
+  },
+  "resources": [
+    // Multiple backend pools will be created here, and use the path mappings to route correctly
+  ],
+  "outputs": {
+    "outerCopy": {
+      "type": "array",
+      "value": "[variables('outerCopy')]"
+    },
+    "innerCopy": {
+      "type": "array",
+      "value": "[variables('innerCopy')]"
+    }
+  }
+}

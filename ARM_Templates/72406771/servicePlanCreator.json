@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "servicePlanName": {
+          "defaultValue": "[resourceGroup().name]",
+          "type": "string",
+          "metadata": {
+              "description": "The name of the newly created resource"
+              }
+      },
+      "operatingSystem": {
+          "type": "string",
+          "defaultValue": "windows",
+          "metadata": {
+              "description": "The Operating system the the newly created resource will use"
+              }
+      },
+      "sku": {
+          "type": "string",
+          "defaultValue": "S1",
+          "metadata": {
+              "description": "The sku (pricing tier) the resource group the service plan will use"
+          }
+      },
+      "location": {
+          "type": "string",
+          "defaultValue": "[resourceGroup().Location]",
+          "metadata": {
+              "description": "(Optional) The location og the resource. Will default to the location of the resource group if not set."
+          }
+      }
+  },
+  "functions": [],
+  "variables": {},
+  "resources": [
+      {
+          "name": "[parameters('servicePlanName')]",
+          "type": "Microsoft.Web/serverfarms",
+          "apiVersion": "2020-12-01",
+          "location": "[parameters('location')]",
+          "kind": "[parameters('operatingSystem')]",
+          "sku": {
+              "name": "[parameters('sku')]"
+          },
+          "tags": {},
+          "properties": {
+              "name": "[parameters('servicePlanName')]"
+          }
+          
+      }
+  ],
+  "outputs": {}
+}

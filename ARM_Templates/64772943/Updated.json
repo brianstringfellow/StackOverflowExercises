@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "array"
+    }
+  },
+  "variables": {
+    "appServiceName": "prefix",
+    "copy": [
+      {
+        "name": "webSiteNames",
+        "count": "[length(parameters('location'))]",
+        "input": {
+          "name": "[concat(variables('appServiceName'), parameters('location')[copyIndex('webSiteNames')])]",
+          "location": "[parameters('location')[copyIndex('webSiteNames')]]"
+        }
+      }
+    ]
+  },
+  "resources": [
+    // { // App Services
+    //     "type": "Microsoft.Web/sites",
+    //     "name": "[variables('webSiteNames')[copyIndex()].name]",
+    //     "apiVersion": "2018-11-01",
+    //     "copy": {
+    //         "name": "Copy website",
+    //         "count": "[length(parameters('location'))]"
+    //     },
+    //     "location": "[variables('webSiteNames')[copyIndex()].location]",
+    //     ...
+    // }
+  ],
+  "outputs": {
+    "websitesname": {
+      "type": "array",
+      "copy": {
+        "count": "[length(variables('webSiteNames'))]",
+        "input": {
+          "name": "[variables('webSiteNames')[copyIndex()].name]"
+        }
+      }
+    },
+    "webSiteName": {
+      "type": "array",
+      "value": "[variables('webSiteNames')]"
+    }
+  }
+}
