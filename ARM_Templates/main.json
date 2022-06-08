@@ -1,0 +1,289 @@
+{
+"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+"contentVersion": "1.0.0.0",
+ "parameters": {
+
+"VnetResourceGroup": {
+  "type": "string"
+},
+"VnetName": {
+  "type": "string"
+},
+"SubnetName": {
+  "type": "string"
+},
+
+"adminusername": {
+  "type": "string",
+  "metadata": {
+    "description": "Admin username for VM"
+  }
+
+},
+"adminpassword": {
+  "type": "string"
+},
+"vm-name": {
+  "type": "string",
+  "metadata": {
+    "description": ""
+  }
+},
+"virtualMachineCount": {
+  "type": "int",
+
+  "metadata": {
+    "description": "Number of Virtual machines to be deployed"
+  }
+},
+"vmSize": {
+  "type": "string",
+  "metadata": {
+    "description": "description"
+  }
+},
+"vm-image-name": {
+  "type": "string",
+  "metadata": {
+    "description": "description"
+  }
+},
+"vm-image-rg": {
+  "type": "string",
+  "metadata": {
+    "description": "description"
+  }
+},
+
+"dataDisksize": {
+  "type": "int"
+},
+"datadisks-count": {
+  "type": "int"
+
+},
+
+"osDiskType": {
+  "type": "string"
+
+},
+"osDiskSize": {
+  "type": "int",
+  "metadata": {
+    "description": "description"
+  }
+},
+"maxAvailabilityzones": {
+  "type": "int",
+  "metadata": {
+    "description": "description"
+  }
+}
+  },
+
+"variables": {
+
+
+"ImageReferenceId": "[concat(subscription().id, '/resourceGroups/', parameters('vm-image-rg'), '/providers/Microsoft.Compute/images/', parameters('vm-image-name'))]",
+"vnetId": "[concat(subscription().id, '/resourceGroups/', parameters('VnetResourceGroup'), '/providers/Microsoft.Network/virtualNetworks/', parameters('VnetName'))]",
+"subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+},
+ "resources": [
+{
+  "type": "Microsoft.Network/networkInterfaces",
+  "name": "[concat('nic-',parameters('vm-name'),'-0', copyIndex(1))]",
+  "apiVersion": "2018-11-01",
+  "location": "[resourceGroup().location]",
+  "copy": {
+    "name": "nicLoop",
+    "count": "[parameters('virtualMachineCount')]"
+  },
+  "properties": {
+    "enableAcceleratedNetworking": true,
+    "ipConfigurations": [
+      {
+        "name": "ipconfig1",
+        "properties": {
+          "privateIPAllocationMethod": "Dynamic",
+          "subnet": {
+            "id": "[variables('subnetRef')]"
+          }
+        }
+      }
+    ]
+  }
+},
+
+{
+  "type": "Microsoft.Compute/virtualMachines",
+  "name": "[concat(parameters('vm-name'),'-0', copyIndex(1))]",
+  "apiVersion": "2020-06-01",
+  "location": "[resourceGroup().location]",
+  "zones": [
+    "[string(add(mod(copyIndex(0), parameters('maxAvailabilityzones')), 1))]"
+  ],
+  "copy": {
+    "name": "virtualMachineLoop",
+    "count": "[parameters('virtualMachineCount')]"
+  },
+  "dependsOn": [
+    "nicLoop"
+
+
+  ],
+  "properties": {
+    "hardwareProfile": {
+      "vmSize": "[parameters('vmSize')]"
+    },
+    "osProfile": {
+      "computerName": "[concat(parameters('vm-name'),'-0', copyIndex(1))]",
+      "adminusername": "[parameters('adminusername')]",
+      "adminPassword": "[parameters('adminpassword')]"
+
+
+    },
+
+
+    "storageProfile": {
+      "copy": [
+        {
+          "name": "dataDisks",
+          "count": "[parameters('datadisks-count')]",
+          "input": {
+            "lun": "[copyIndex('dataDisks')]",
+            "name": "[concat('dataDisk',copyIndex('dataDisks',1),'-',parameters('vm-name'),'-0',copyIndex(1))]",
+            "createOption": "Empty",
+            "diskSizeGB": "[parameters('dataDisksize')]"
+          }
+        }
+      ],
+
+      "imageReference": { "id": "[variables('ImageReferenceId')]" },
+      "osDisk": {
+        "name": "[concat('osdisk-',parameters('vm-name'),'-0', copyIndex(1))]",
+        "createOption": "FromImage",
+        "caching": "ReadWrite",
+        "diskSizeGB": "[parameters('osDiskSize')]",
+        "managedDisk": {
+          "storageAccountType": "[parameters('osDiskType')]"
+        }
+      }
+    },
+    "networkProfile": {
+      "networkInterfaces": [
+        {
+          "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-',parameters('vm-name'),'-0', copyIndex(1)))]"
+        }
+      ]
+    },
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true
+      }
+    }
+  }
+},
+{
+  "type": "Microsoft.Resources/deployments",
+  "name": "StaticIP",
+  "apiVersion": "2020-06-01",
+  "dependsOn": [
+    "nicLoop",
+    "virtualMachineLoop"
+  ],
+  "properties": {
+    "mode": "Incremental",
+    "expressionEvaluationOptions": {
+      "scope": "inner"
+    },
+    "parameters": {
+
+      "SubnetRef": {
+        "value": "[variables('SubnetRef')]"
+      },
+
+      "virtualMachineCount": {
+        "value": "[parameters('virtualMachineCount')]"
+      },
+      "vm-name": {
+        "value": "[parameters('vm-name')]"
+      }
+
+    },
+    "template": {
+
+      "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+
+        "subnetRef": {
+          "type": "string"
+        },
+
+
+        "virtualMachineCount": {
+          "type": "int",
+
+          "metadata": {
+            "description": "Number of Virtual machines to be deployed"
+          }
+        },
+        "vm-name": {
+          "type": "string",
+          "metadata": {
+            "description": "description"
+          }
+        }
+      },
+
+      "variables": {
+
+      },
+      "resources": [
+        {
+          "type": "Microsoft.Network/networkInterfaces",
+          "name": "[concat('assignstaticip',copyIndex(1))]",
+          "apiVersion": "2020-05-01",
+          "location": "[resourceGroup().location]",
+          "copy": {
+            "name": "nicStaticIpLoop",
+            "count": "[parameters('virtualMachineCount')]"
+          },
+          "properties": {
+            "ipConfigurations": [
+              {
+                "name": "ipconfig1",
+                "properties": {
+                  "privateIPAllocationMethod": "Static",
+                  "privateIPAddress": "[reference(concat('nic-',parameters('vm-name'),'-0', copyIndex('nicStaticIpLoop',1))).ipConfigurations[0].properties.privateIPAddress]",
+                  "subnet": {
+                    "id": "[parameters('subnetRef')]"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+],
+ "outputs": {
+
+"vm-ipaddress": {
+  "type": "array",
+  "copy": {
+    "count": "[parameters('virtualMachineCount')]",
+    "input": "[reference(concat('nic-',parameters('vm-name'),'-0', copyIndex(1))).ipConfigurations[0].properties.privateIPAddress]"
+  }
+},
+"vm-name": {
+  "type": "array",
+  "copy": {
+    "count": "[parameters('virtualMachineCount')]",
+    "input": "[concat(parameters('vm-name'),'-0', copyIndex(1))]"
+  }
+}
+  }
+ }
