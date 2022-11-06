@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "privateEndpointName": {
+      "type": "string",
+      "defaultValue": "sspnuse2sa00-blob-privateendpoint"
+    },
+    "nicId": {
+      "type": "string",
+      "defaultValue": "/subscriptions/e6dc771a-4a9a-4ccf-9b75-faabead09acb/resourceGroups/SSP-NonProd-USE2-Ancillary/providers/Microsoft.Network/networkInterfaces/sspnuse2sa00-blob-privateendpoint.nic.57e5d57c-b6a9-474b-9aa1-af9e96eb86c6"
+    }
+  },
+  "variables": {},
+  "resources": [],
+  "outputs": {
+    "nicId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpointName')), '2021-02-01').networkInterfaces[0].id]"
+    },
+    "ip": {
+      "type": "string",
+      "value": "[reference(reference(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpointName')), '2021-02-01').networkInterfaces[0].id, '2021-08-01').ipConfigurations[0].properties.privateIpAddress]"
+    }
+  }
+}

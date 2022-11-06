@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "privateEndpointName": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "nested",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "nicName": {
+            "value": "[last(split(reference(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpointName')), '2021-08-01').networkInterfaces[0].id, '/'))]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "nicName": {
+              "type": "string"
+            }
+          },
+          "resources": [],
+          "outputs": {
+            "ip": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('nicName')), '2021-08-01').ipConfigurations[0].properties.privateIPAddress]"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "nicIpAddress": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'nested')).outputs.ip.value]"
+    }
+  }
+}
